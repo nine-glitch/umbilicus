@@ -508,7 +508,7 @@ async function claude(system, userText, withImg=false) {
   const content = [];
   if (withImg) content.push({ type:'image', source:{ type:'base64', media_type:fotoMime, data:foto64 } });
   content.push({ type:'text', text:userText });
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/claude', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
