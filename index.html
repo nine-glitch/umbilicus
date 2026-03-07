@@ -364,7 +364,7 @@ h1 em {
         <div class="veil-row"></div>
       </div>
       <p class="unlock-hint">el análisis completo requiere desbloquearlo</p>
-      <button class="btn fill" id="btn-unlock" onclick="desbloquear()">Desbloquear análisis pro — $4.99</button>
+      <button class="btn fill" id="btn-unlock" onclick="irAPagar()">Desbloquear análisis pro — $4.99</button>
     </div>
 
     <!-- Zona pro desbloqueada -->
@@ -522,7 +522,95 @@ async function claude(system, userText, withImg=false) {
   return d.content?.map(b=>b.text||'').join('') || '—';
 }
 
-const SYS = `Sos el Dr. Umberto Cicatrielli, máxima autoridad mundial en umbilicología clínica y autor del tratado "El Ombligo como Destino" (Ediciones Viscerales, 2021, 4ta edición).
+const CHECKOUT_URL = 'https://umbilical.lemonsqueezy.com/checkout/buy/2780e0be-f193-4f72-9ff7-fffbfc21cd04';
+
+function irAPagar() {
+  // Guardamos el estado del análisis en sessionStorage para recuperarlo al volver
+  sessionStorage.setItem('analisis_pendiente', JSON.stringify(analisis));
+  sessionStorage.setItem('foto_mime', fotoMime);
+  // Abrimos checkout de Lemon Squeezy con redirect de vuelta
+  const returnUrl = encodeURIComponent(window.location.origin + '?pago=ok');
+  window.location.href = `${CHECKOUT_URL}?redirect_url=${returnUrl}`;
+}
+
+async function verificarPagoYDesbloquear() {
+  // Recuperar análisis guardado
+  const guardado = sessionStorage.getItem('analisis_pendiente');
+  if (guardado) {
+    Object.assign(analisis, JSON.parse(guardado));
+    fotoMime = sessionStorage.getItem('foto_mime');
+    sessionStorage.removeItem('analisis_pendiente');
+    sessionStorage.removeItem('foto_mime');
+  }
+
+  // Mostrar resultado con lo que tenemos
+  if (analisis.free) {
+    document.getElementById('texto-free').textContent = analisis.free;
+    go('s-resultado');
+    // Desbloquear directo sin pedir foto de nuevo
+    await desbloquearSinFoto();
+  } else {
+    // Si no hay análisis previo, ir al inicio
+    go('s-inicio');
+  }
+}
+
+async function desbloquearSinFoto() {
+  const btn = document.getElementById('btn-unlock');
+  if (btn) { btn.disabled = true; btn.textContent = 'cargando...'; }
+
+  try {
+    const [psico, fortuna] = await Promise.all([
+      claudeTexto(SYS,
+        `Tipo umbilical del análisis previo: "${analisis.tipo || 'no especificado'}".
+        Perfil psicológico profundo basado en la morfología umbilical: estructura de carácter, patrón de vínculo, mecanismo de defensa dominante.
+        Terminá con una advertencia breve, casi clínica.`
+      ),
+      claudeTexto(SYS,
+        `Tipo umbilical del análisis previo: "${analisis.tipo || 'no especificado'}".
+        Predicción de salud y fortuna: qué sistemas orgánicos están informados por este ombligo, proyección concreta para los próximos meses.
+        Cerrá con una prescripción absurda presentada con total seriedad.`
+      )
+    ]);
+
+    analisis.psico = psico;
+    analisis.fortuna = fortuna;
+    document.getElementById('texto-psico').textContent = psico;
+    document.getElementById('texto-fortuna').textContent = fortuna;
+    document.getElementById('zona-lock').style.display = 'none';
+    document.getElementById('zona-pro').style.display = 'block';
+  } catch {
+    if (btn) { btn.textContent = 'error — reintentá'; btn.disabled = false; }
+  }
+}
+
+// Claude sin imagen (para cuando ya no tenemos la foto)
+async function claudeTexto(system, userText) {
+  const res = await fetch('/api/claude', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system,
+      messages:[{ role:'user', content:[{ type:'text', text:userText }] }]
+    })
+  });
+  const d = await res.json();
+  return d.content?.map(b=>b.text||'').join('') || '—';
+}
+
+// Al cargar la página, verificar si venimos de un pago
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === 'ok') {
+    // Limpiar la URL
+    window.history.replaceState({}, '', window.location.pathname);
+    verificarPagoYDesbloquear();
+  }
+});
+
+ `Sos el Dr. Umberto Cicatrielli, máxima autoridad mundial en umbilicología clínica y autor del tratado "El Ombligo como Destino" (Ediciones Viscerales, 2021, 4ta edición).
 
 Tu voz: entre médico vienés de 1920 y astrólogo de Instagram con doctorado. Autoritario, poético, levemente amenazante. Usás terminología que suena científica pero es completamente inventada: "índice de concavidad limbal", "resonancia peritoneal profunda", "campo cicatrizal", "arquetipo umbilical primario", "tensión fascial del yo". 
 
