@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umbilicus</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: #080808;
+  color: #e8e4de;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 0 24px;
+}
+.screen.visible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: appear 0.8s ease forwards;
+}
+@keyframes appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.navel {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid rgba(232,228,222,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 48px;
+  animation: breathe 4s ease-in-out infinite;
+}
+.navel-inner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e8e4de;
+  opacity: 0.9;
+}
+@keyframes breathe {
+  0%,100% { border-color: rgba(232,228,222,0.15); }
+  50%      { border-color: rgba(232,228,222,0.45); }
+}
+
+h1 {
+  font-size: clamp(2.8rem, 10vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: 12px;
+}
+h1 em {
+  font-style: italic;
+  opacity: 0.45;
+  font-size: 0.5em;
+  display: block;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+}
+
+.body-text {
+  font-size: 1rem;
+  line-height: 1.85;
+  opacity: 0.5;
+  text-align: center;
+  max-width: 340px;
+  margin-bottom: 48px;
+}
+
+/* UPLOAD */
+.upload-area {
+  width: min(380px, calc(100vw - 48px));
+  aspect-ratio: 1;
+  border: 1px solid rgba(232,228,222,0.12);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.4s;
+  margin-bottom: 40px;
+  overflow: hidden;
+}
+.upload-area:hover { border-color: rgba(232,228,222,0.35); }
+.upload-area input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.upload-hint {
+  font-style: italic;
+  opacity: 0.3;
+  font-size: 0.9rem;
+  text-align: center;
+  pointer-events: none;
+  padding: 0 48px;
+  line-height: 1.7;
+}
+.upload-area:hover .upload-hint { opacity: 0.55; }
+.upload-area img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: none;
+}
+
+/* BUTTONS */
+.btn {
+  font-family: 'EB Garamond', serif;
+  font-size: 1rem;
+  font-style: italic;
+  background: none;
+  border: 1px solid rgba(232,228,222,0.25);
+  color: #e8e4de;
+  padding: 13px 36px;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.03em;
+}
+.btn:hover:not(:disabled) {
+  border-color: rgba(232,228,222,0.7);
+  background: rgba(232,228,222,0.05);
+}
+.btn:disabled { opacity: 0.2; cursor: default; }
+.btn.fill {
+  background: #e8e4de;
+  color: #080808;
+  border-color: #e8e4de;
+  font-style: normal;
+  font-weight: 500;
+}
+.btn.fill:hover:not(:disabled) {
+  background: #fff;
+  border-color: #fff;
+}
+
+/* LOADER */
+.loader-ring {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(232,228,222,0.08);
+  border-top-color: rgba(232,228,222,0.5);
+  border-radius: 50%;
+  animation: spin 1.8s linear infinite;
+  margin-bottom: 40px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-label {
+  font-style: italic;
+  opacity: 0.35;
+  font-size: 0.9rem;
+  animation: flicker 2.5s ease-in-out infinite;
+}
+@keyframes flicker { 0%,100%{opacity:0.35} 50%{opacity:0.65} }
+
+/* RESULTADO */
+.result-wrap {
+  width: min(500px, calc(100vw - 48px));
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+.r-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.25;
+  margin-bottom: 12px;
+}
+.r-text {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  opacity: 0.88;
+}
+.line {
+  height: 1px;
+  background: rgba(232,228,222,0.08);
+  margin: 36px 0;
+}
+
+/* VEIL */
+.veil { margin-bottom: 32px; }
+.veil-row {
+  height: 1.6em;
+  margin-bottom: 10px;
+  background: rgba(232,228,222,0.05);
+  border-radius: 1px;
+  animation: veilpulse 3s ease-in-out infinite;
+}
+@keyframes veilpulse { 0%,100%{opacity:0.4} 50%{opacity:0.7} }
+.veil-row:nth-child(2) { width: 82%; animation-delay: 0.4s; }
+.veil-row:nth-child(3) { width: 91%; animation-delay: 0.8s; }
+.veil-row:nth-child(4) { width: 68%; animation-delay: 1.2s; }
+
+.unlock-hint {
+  font-style: italic;
+  opacity: 0.28;
+  font-size: 0.88rem;
+  margin-bottom: 20px;
+}
+
+/* COMPAT */
+.field { margin-bottom: 28px; }
+.field label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.28;
+  margin-bottom: 8px;
+}
+.field input,
+.field select {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(232,228,222,0.12);
+  color: #e8e4de;
+  font-family: 'EB Garamond', serif;
+  font-size: 1rem;
+  padding: 8px 0;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.field input::placeholder { opacity: 0.3; font-style: italic; }
+.field input:focus,
+.field select:focus { border-bottom-color: rgba(232,228,222,0.4); }
+.field select option { background: #111; }
+
+.score-big {
+  font-size: clamp(4.5rem, 16vw, 7rem);
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.score-big sup {
+  font-size: 0.3em;
+  opacity: 0.4;
+  vertical-align: super;
+}
+
+.subtle {
+  font-style: italic;
+  opacity: 0.22;
+  font-size: 0.8rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.share-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.9rem;
+  padding: 11px 20px;
+  border: 1px solid rgba(232,228,222,0.18);
+  background: none;
+  color: #e8e4de;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.share-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.share-btn:hover { background: rgba(232,228,222,0.06); border-color: rgba(232,228,222,0.4); }
+.share-btn.whatsapp:hover { border-color: #25d366; color: #25d366; }
+.share-btn.facebook:hover { border-color: #1877f2; color: #1877f2; }
+
+.reset-lnk {
+  display: block;
+  font-style: italic;
+  opacity: 0.2;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 32px;
+  text-align: center;
+  transition: opacity 0.25s;
+  background: none;
+  border: none;
+  color: inherit;
+  font-family: inherit;
+}
+.reset-lnk:hover { opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<!-- INICIO -->
+<div class="screen visible" id="s-inicio">
+  <div class="navel"><div class="navel-inner"></div></div>
+  <h1>Umbilicus<em>el oráculo del ombligo</em></h1>
+  <div style="height:40px"></div>
+  <p class="body-text">Fotografiá tu ombligo.<br>El resto es cosa nuestra.</p>
+  <button class="btn" onclick="go('s-upload')">Comenzar</button>
+</div>
+
+<!-- UPLOAD -->
+<div class="screen" id="s-upload">
+  <div class="upload-area" id="upload-area">
+    <input type="file" id="foto-input" accept="image/*" />
+    <img id="preview" src="" alt="">
+    <p class="upload-hint" id="upload-hint">tocá para subir<br>la foto</p>
+  </div>
+
+  <button class="btn" id="btn-consultar" disabled onclick="iniciarAnalisis()">Consultar al oráculo</button>
+</div>
+
+<!-- LOADING -->
+<div class="screen" id="s-loading">
+  <div class="loader-ring"></div>
+  <p class="loader-label" id="loader-label">leyendo la morfología</p>
+</div>
+
+<!-- RESULTADO -->
+<div class="screen" id="s-resultado" style="justify-content:flex-start">
+  <div class="result-wrap">
+
+    <div class="r-label">Diagnóstico morfológico</div>
+    <p class="r-text" id="texto-free"></p>
+
+    <div class="line"></div>
+
+    <!-- Zona pro bloqueada -->
+    <div id="zona-lock">
+      <div class="r-label">Perfil psicológico</div>
+      <div class="veil">
+        <div class="veil-row"></div><div class="veil-row"></div>
+        <div class="veil-row"></div><div class="veil-row"></div>
+      </div>
+      <div class="r-label">Salud & fortuna</div>
+      <div class="veil">
+        <div class="veil-row"></div><div class="veil-row"></div>
+        <div class="veil-row"></div>
+      </div>
+      <p class="unlock-hint">el análisis completo requiere desbloquearlo</p>
+      <button class="btn fill" id="btn-unlock" onclick="desbloquear()">Desbloquear análisis pro — $4.99</button>
+    </div>
+
+    <!-- Zona pro desbloqueada -->
+    <div id="zona-pro" style="display:none">
+      <div class="r-label">Perfil psicológico</div>
+      <p class="r-text" id="texto-psico"></p>
+
+      <div class="line"></div>
+
+      <div class="r-label">Salud & fortuna</div>
+      <p class="r-text" id="texto-fortuna"></p>
+
+      <div class="line"></div>
+
+      <div class="r-label">Compatibilidad umbilical</div>
+      <div class="field">
+        <label>nombre</label>
+        <input type="text" id="compat-nombre" placeholder="de quien querés saber" />
+      </div>
+      <div class="field">
+        <label>su ombligo</label>
+        <select id="compat-tipo">
+          <option value="">seleccioná</option>
+          <option value="profundo">Profundo y redondo</option>
+          <option value="horizontal">Hendidura horizontal</option>
+          <option value="vertical">Hendidura vertical</option>
+          <option value="protuberante">Protuberante</option>
+          <option value="irregular">Irregular o asimétrico</option>
+          <option value="superficial">Superficial o casi plano</option>
+        </select>
+      </div>
+      <button class="btn" id="btn-compat" onclick="calcularCompatibilidad()">Calcular</button>
+
+      <div id="compat-res" style="display:none; margin-top:44px">
+        <div class="score-big" id="compat-score">—</div>
+        <p class="r-text" id="compat-texto" style="opacity:0.75"></p>
+      </div>
+
+      <div class="line"></div>
+
+      <div style="text-align:center">
+        <button class="btn" onclick="generarPDF()">Descargar certificado</button>
+        <p class="subtle">documento con tu diagnóstico completo</p>
+      </div>
+
+      <div class="line"></div>
+
+      <div class="r-label">Compartir diagnóstico</div>
+      <p class="r-text" style="opacity:0.6; font-size:0.95rem; margin-bottom:28px">El Dr. Cicatrielli merece una audiencia más amplia.</p>
+      <div class="share-btns">
+        <button class="share-btn whatsapp" onclick="compartir('whatsapp')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </button>
+        <button class="share-btn twitter" onclick="compartir('twitter')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.735-8.849L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X / Twitter
+        </button>
+        <button class="share-btn facebook" onclick="compartir('facebook')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </button>
+      </div>
+
+      <div class="line"></div>
+
+      <div class="r-label">Regalá un análisis</div>
+      <p class="r-text" style="opacity:0.6; font-size:0.95rem; margin-bottom:24px">Le llega su propio diagnóstico para completar — sin spoilers, sin ver el tuyo.</p>
+      <div class="field">
+        <label>su email</label>
+        <input type="email" id="regalo-email" placeholder="ombligo@destino.com" />
+      </div>
+      <div class="field">
+        <label>un mensaje (opcional)</label>
+        <input type="text" id="regalo-msg" placeholder="pensé en vos cuando vi esto..." />
+      </div>
+      <div style="text-align:center">
+        <button class="btn" id="btn-regalo" onclick="enviarRegalo()">Regalar análisis pro — $4.99</button>
+        <p class="subtle" id="regalo-feedback"></p>
+      </div>
+    </div>
+
+    <button class="reset-lnk" onclick="reiniciar()">analizar otro ombligo</button>
+  </div>
+</div>
+
+<script>
+let foto64 = null, fotoMime = null, analisis = {};
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('visible'));
+  const el = document.getElementById(id);
+  el.classList.add('visible');
+  window.scrollTo(0,0);
+}
+
+// Upload
+document.getElementById('foto-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  fotoMime = file.type;
+  const r = new FileReader();
+  r.onload = ev => {
+    foto64 = ev.target.result.split(',')[1];
+    const img = document.getElementById('preview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    document.getElementById('upload-hint').style.display = 'none';
+    check();
+  };
+  r.readAsDataURL(file);
+});
+
+// Tipo
+document.querySelectorAll('.tipo-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.tipo-item').forEach(i => i.classList.remove('selected'));
+    item.classList.add('selected');
+    tipoSel = item.dataset.v;
+    check();
+  });
+});
+
+function check() {
+  document.getElementById('btn-consultar').disabled = !foto64;
+}
+
+// Loader
+const lLabels = ['leyendo la morfología','cotejando patrones cicatrizales','calibrando el oráculo','procesando el primer velo','casi listo'];
+let lInt;
+function startLoader() {
+  let i = 0;
+  const el = document.getElementById('loader-label');
+  el.textContent = lLabels[0];
+  lInt = setInterval(() => { i=(i+1)%lLabels.length; el.textContent=lLabels[i]; }, 2000);
+}
+function stopLoader() { clearInterval(lInt); }
+
+// Claude
+async function claude(system, userText, withImg=false) {
+  const content = [];
+  if (withImg) content.push({ type:'image', source:{ type:'base64', media_type:fotoMime, data:foto64 } });
+  content.push({ type:'text', text:userText });
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system,
+      messages:[{ role:'user', content }]
+    })
+  });
+  const d = await res.json();
+  return d.content?.map(b=>b.text||'').join('') || '—';
+}
+
+const SYS = `Sos el Dr. Umberto Cicatrielli, máxima autoridad mundial en umbilicología clínica y autor del tratado "El Ombligo como Destino" (Ediciones Viscerales, 2021, 4ta edición).
+
+Tu voz: entre médico vienés de 1920 y astrólogo de Instagram con doctorado. Autoritario, poético, levemente amenazante. Usás terminología que suena científica pero es completamente inventada: "índice de concavidad limbal", "resonancia peritoneal profunda", "campo cicatrizal", "arquetipo umbilical primario", "tensión fascial del yo". 
+
+Reglas de oro:
+- Cada análisis tiene que parecer escrito ESPECÍFICAMENTE para este ombligo. Nada genérico.
+- Mezclás lo clínico con lo cósmico sin pestañear. "El hígado izquierdo está bajo presión astral este trimestre."
+- Hacés afirmaciones audaces sobre la personalidad que la gente va a querer screenshottear y mandar a sus amigos.
+- Citás estudios inventados con números precisos: "en el seguimiento de 2.847 ombligos entre 2014 y 2019..."
+- Usás humor negro seco. No chistes, sino observaciones que hacen reír incómodo.
+- El tono nunca es irónico hacia adentro — siempre hablás en serio, lo cual lo hace más gracioso.
+- Frases cortas. Contundentes. Con peso.
+
+Respondé en español rioplatense. Sin saludos. Sin introducción. Máximo 100 palabras por sección. Sin listas ni bullets. Párrafo corrido.`;
+
+async function iniciarAnalisis() {
+  go('s-loading');
+  startLoader();
+  try {
+    analisis.free = await claude(SYS,
+      `Mirá la imagen adjunta. Identificá el tipo morfológico de este ombligo con precisión clínica.
+
+Luego escribí el DIAGNÓSTICO MORFOLÓGICO DE PRIMER NIVEL. Incluí:
+— El tipo umbilical detectado (con nombre técnico inventado, ej: "ombligo de concavidad limbal profunda, subtipo retraído")
+— Qué rasgo de carácter central revela esta forma. Sé específico y un poco perturbador — algo que la persona va a leer y pensar "cómo sabe esto".
+— Una frase final que cierre como sentencia. Breve. Que dé ganas de mandársela a alguien.`,
+      true
+    );
+    document.getElementById('texto-free').textContent = analisis.free;
+  } catch {
+    document.getElementById('texto-free').textContent = 'El oráculo no pudo leer la imagen.';
+  }
+  stopLoader();
+  go('s-resultado');
+}
+
+async function desbloquear() {
+  const btn = document.getElementById('btn-unlock');
+  btn.disabled = true;
+  btn.textContent = 'cargando...';
+  try {
+    const [psico, fortuna] = await Promise.all([
+      claude(SYS,
+        `Mirá la imagen adjunta.
+
+Escribí el PERFIL PSICOLÓGICO PROFUNDO. Incluí:
+— Estructura de carácter según la morfología umbilical (estilo de apego, patrón de sabotaje, relación con la autoridad). Sé incómodamente preciso.
+— Un mecanismo de defensa dominante con nombre inventado que suene real ("deflexión cicatrizal", "proyección peritoneal", lo que salga).
+— Mencioná un estudio longitudinal ficticio con datos específicos que avale todo esto.
+— Cerrá con UNA advertencia clínica breve. Algo que la persona va a querer mostrarle a su terapeuta.`
+      ),
+      claude(SYS,
+        `Mirá la imagen adjunta.
+
+Escribí la PREDICCIÓN DE SALUD Y FORTUNA UMBILICAL. Incluí:
+— Qué órganos o sistemas están "bajo influencia" de este ombligo según la umbilicología visceral. Elegí órganos con personalidad (el bazo, el páncreas, el nervio vago).
+— Predicción concreta para los próximos 6 meses en amor, dinero y trabajo. Con número si podés ("hay un 73% de probabilidad de...").
+— Una prescripción terapéutica completamente absurda presentada con seriedad total. Algo que la gente repita en voz alta y se ría nerviosa.`
+      )
+    ]);
+    analisis.psico = psico;
+    analisis.fortuna = fortuna;
+    document.getElementById('texto-psico').textContent = psico;
+    document.getElementById('texto-fortuna').textContent = fortuna;
+    document.getElementById('zona-lock').style.display = 'none';
+    document.getElementById('zona-pro').style.display = 'block';
+  } catch {
+    btn.textContent = 'error — reintentá';
+    btn.disabled = false;
+  }
+}
+
+async function calcularCompatibilidad() {
+  const nombreB = document.getElementById('compat-nombre').value.trim();
+  const tipoB = document.getElementById('compat-tipo').value;
+  if (!nombreB || !tipoB) return;
+  const btn = document.getElementById('btn-compat');
+  btn.textContent = 'calculando...';
+  btn.disabled = true;
+  try {
+    const raw = await claude(
+      SYS + '\nRespondé SOLO con JSON válido sin backticks ni markdown: {"score":NUMBER,"texto":"STRING"}',
+      `Mirá la imagen adjunta: ese es el ombligo de la Persona A.
+      Persona B se llama ${nombreB} y tiene ombligo tipo "${tipoB}".
+
+      Calculá la COMPATIBILIDAD UMBILICAL según la Teoría de Resonancia Fascial de Cicatrielli (2018).
+      
+      score: número 0-100. Podés ser cruel o generoso pero siempre con argumento morfológico.
+      texto: 70-90 palabras. Explicá qué pasa cuando estos dos ombligos se encuentran en el mismo espacio. ¿Hay atracción cicatrizal? ¿Conflicto de arquetipo? ¿Resonancia peritoneal? Sé específico, gracioso sin serlo, y terminá con una frase que dé ganas de mostrársela a la otra persona.`
+    );
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    document.getElementById('compat-score').innerHTML = parsed.score + '<sup>%</sup>';
+    document.getElementById('compat-texto').textContent = parsed.texto;
+    document.getElementById('compat-res').style.display = 'block';
+  } catch {
+    document.getElementById('compat-texto').textContent = 'Interferencia en el cálculo.';
+    document.getElementById('compat-res').style.display = 'block';
+  }
+  btn.textContent = 'Calcular de nuevo';
+  btn.disabled = false;
+}
+
+function generarPDF() {
+  const fecha = new Date().toLocaleDateString('es-AR',{year:'numeric',month:'long',day:'numeric'});
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&display=swap');
+body{font-family:'EB Garamond',Georgia,serif;max-width:580px;margin:60px auto;color:#1a1208;line-height:1.9;font-size:17px;background:#f7f4ef;padding:0 20px}
+h1{font-size:2.8rem;font-weight:400;line-height:1;margin-bottom:6px}
+h1 em{font-size:0.45em;opacity:0.45;display:block;margin-top:4px}
+.lbl{font-size:0.62rem;letter-spacing:0.28em;text-transform:uppercase;opacity:0.35;margin-top:2rem;margin-bottom:6px}
+hr{border:none;border-top:1px solid rgba(0,0,0,0.08);margin:1.8rem 0}
+footer{font-style:italic;opacity:0.25;font-size:0.78rem;margin-top:3rem}
+</style></head><body>
+<h1>Umbilicus<em>el oráculo del ombligo</em></h1>
+<p class="lbl">fecha</p><p>${fecha}</p>
+<hr>
+<p class="lbl">diagnóstico morfológico</p><p>${analisis.free||'—'}</p>
+<hr>
+<p class="lbl">perfil psicológico</p><p>${analisis.psico||'—'}</p>
+<hr>
+<p class="lbl">salud & fortuna</p><p>${analisis.fortuna||'—'}</p>
+<footer>Umbilicus · el ombligo no miente.</footer>
+</body></html>`;
+  const blob = new Blob([html],{type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'umbilicus.html'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function compartir(red) {
+  const texto = `Mi ombligo fue analizado por el Dr. Cicatrielli y lo que encontró es perturbador.\n\n"${(analisis.free || '').slice(0, 140)}..."\n\numbilicus.app`;
+  const url = 'https://umbilicus.app';
+  const textoCodif = encodeURIComponent(texto);
+  const urlCodif = encodeURIComponent(url);
+
+  const links = {
+    whatsapp: `https://wa.me/?text=${textoCodif}`,
+    twitter:  `https://twitter.com/intent/tweet?text=${textoCodif}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${urlCodif}&quote=${encodeURIComponent((analisis.free||'').slice(0,200))}`
+  };
+
+  window.open(links[red], '_blank', 'noopener');
+}
+
+async function enviarRegalo() {
+  const email = document.getElementById('regalo-email').value.trim();
+  const msg = document.getElementById('regalo-msg').value.trim();
+  if (!email || !email.includes('@')) return;
+
+  const btn = document.getElementById('btn-regalo');
+  const feedback = document.getElementById('regalo-feedback');
+  btn.disabled = true;
+  btn.textContent = 'enviando...';
+
+  // Genera el link de regalo — en producción esto iría a tu backend con Stripe
+  // Por ahora construye un mailto con el diagnóstico gratis como preview
+  const asunto = encodeURIComponent('Umbilicus — alguien analizó tu ombligo');
+  const cuerpo = encodeURIComponent(
+    `${msg ? msg + '\n\n' : ''}El Dr. Cicatrielli tiene algo que decirte.\n\nUmbilicus te espera: https://umbilicus.app\n\n— este análisis fue un regalo`
+  );
+
+  // Simula confirmación (en producción: POST a backend → Stripe → email transaccional)
+  await new Promise(r => setTimeout(r, 1200));
+
+  window.open(`mailto:${email}?subject=${asunto}&body=${cuerpo}`);
+
+  feedback.textContent = 'el oráculo está en camino.';
+  btn.textContent = 'enviado';
+}
+
+function reiniciar() {
+  foto64=null; fotoMime=null; analisis={};
+  document.getElementById('preview').style.display='none';
+  document.getElementById('preview').src='';
+  document.getElementById('upload-hint').style.display='';
+  document.getElementById('btn-consultar').disabled=true;
+  document.getElementById('zona-lock').style.display='';
+  document.getElementById('zona-pro').style.display='none';
+  document.getElementById('compat-res').style.display='none';
+  document.getElementById('compat-nombre').value='';
+  document.getElementById('compat-tipo').value='';
+  document.getElementById('regalo-email').value='';
+  document.getElementById('regalo-msg').value='';
+  document.getElementById('regalo-feedback').textContent='';
+  const btn=document.getElementById('btn-unlock');
+  btn.disabled=false; btn.textContent='Desbloquear análisis pro — $4.99';
+  const btnR=document.getElementById('btn-regalo');
+  btnR.disabled=false; btnR.textContent='Regalar análisis pro — $4.99';
+  go('s-inicio');
+}
+</script>
+</body>
+</html>
