@@ -454,7 +454,6 @@ async function claude(system, userText, withImg = false, extra = {}) {
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
       temperature: 1.15,
-      top_p: 0.98,
       system,
       messages: [{ role: 'user', content }],
       ...extra
