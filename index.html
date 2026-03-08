@@ -331,6 +331,13 @@ h1 em {
 
       <div class="line"></div>
 
+      <div style="text-align:center">
+        <button class="btn" onclick="generarCertificado()">Descargar certificado</button>
+        <p class="subtle">Instituto Internacional de Umbilicología</p>
+      </div>
+
+      <div class="line"></div>
+
       <div class="r-label">Compatibilidad umbilical</div>
       <p class="compat-cta">El Dr. Cicatrielli puede calcular la resonancia fascial entre tu ombligo y el de otra persona. Ingresá su nombre y tipo.</p>
       <div class="field">
@@ -354,13 +361,6 @@ h1 em {
       <div id="compat-res" style="display:none; margin-top:44px">
         <div class="score-big" id="compat-score">—</div>
         <p class="r-text" id="compat-texto" style="opacity:0.75"></p>
-      </div>
-
-      <div class="line"></div>
-
-      <div style="text-align:center">
-        <button class="btn" onclick="generarCertificado()">Descargar certificado</button>
-        <p class="subtle">Instituto Internacional de Umbilicología</p>
       </div>
 
       <div class="line"></div>
@@ -443,7 +443,7 @@ function setBarras(ids, vals) {
   });
 }
 
-async function claude(system, userText, withImg = false) {
+async function claude(system, userText, withImg = false, extra = {}) {
   const content = [];
   if (withImg && foto64) content.push({ type: 'image', source: { type: 'base64', media_type: fotoMime, data: foto64 } });
   content.push({ type: 'text', text: userText });
@@ -453,15 +453,100 @@ async function claude(system, userText, withImg = false) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
+      temperature: 1.15,
+      top_p: 0.98,
       system,
-      messages: [{ role: 'user', content }]
+      messages: [{ role: 'user', content }],
+      ...extra
     })
   });
   const d = await res.json();
   return d.content?.map(b => b.text || '').join('') || '—';
 }
 
-const SYS = `Sos el Dr. Umberto Cicatrielli, autor de "El Ombligo como Destino" (Ediciones Viscerales, 2021). Médico vienés de 1920 cruzado con astrólogo de Instagram. Autoritario, poético, levemente amenazante. Terminología pseudocientífica inventada que suena real.
+// ─── VARIABILIDAD ─────────────────────────────────────────────
+const MOODS = [
+  'sarcástico y cansado del mundo',
+  'poético y levemente trágico',
+  'dramático como en una ópera italiana',
+  'cínico vienés de entreguerras',
+  'místico-esotérico con fundamento anatómico',
+  'freudiano salvaje sin filtro',
+  'como un curandero de barrio con doctorado',
+  'pesimista existencial pero compasivo',
+  'conspiranoico umbilical con evidencia inventada',
+  'profético y un poco amenazante',
+  'clínico frío que de repente dice algo perturbador',
+  'melancólico pero esperanzado, a su manera'
+];
+
+const FOCOS = [
+  'el bazo y su resentimiento histórico',
+  'el patrón amoroso y sus consecuencias viscerales',
+  'la relación con el dinero según la morfología fascial',
+  'el trauma del cordón umbilical y su legado',
+  'el páncreas rebelde y sus decisiones autónomas',
+  'la compatibilidad con signos zodiacales del hemisferio sur',
+  'los ciclos de autosabotaje y su origen peritoneal',
+  'el nervio vago y sus opiniones no solicitadas',
+  'la tensión entre el ombligo y el sistema nervioso central',
+  'las decisiones importantes tomadas después de las 11pm'
+];
+
+const PRESCRIPCIONES = [
+  'baños de sal en forma de ombligo durante 7 lunas consecutivas',
+  'ayuno de ombligos ajenos por 21 días (no mirar redes sociales)',
+  'respirar hacia el ombligo durante exactamente 47 segundos cada mañana mirando al sudeste',
+  'escribir el nombre de un enemigo en el ombligo con aceite de oliva y borrarlo con la mano izquierda',
+  'colocar una piedra pequeña sobre el ombligo durante el sueño REM',
+  'pronunciar "mi fascia se expande" tres veces antes de cada comida importante',
+  'no cruzar los brazos sobre el ombligo entre el 15 y el 22 de cada mes',
+  'sumergir solo el ombligo en agua fría por 9 segundos al despertar'
+];
+
+const FRASES_PROHIBIDAS = [
+  'índice de concavidad limbal',
+  'estudio Heidelberg-Montevideo',
+  'apego ansioso-evitativo',
+  'disociación cicatrizal',
+  'territorio peligroso'
+];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN(arr, n) {
+  const copy = [...arr];
+  const result = [];
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(Math.random() * copy.length);
+    result.push(copy.splice(idx, 1)[0]);
+  }
+  return result;
+}
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function buildSYS() {
+  const mood = pick(MOODS);
+  const foco = pick(FOCOS);
+  const prescripcion = pick(PRESCRIPCIONES);
+  const prohibidas = pickN(FRASES_PROHIBIDAS, 2).join('", "');
+  const palabras = randInt(180, 420);
+
+  return `${SYS_BASE}
+
+MOOD DE ESTA SESIÓN: Hoy el Dr. Cicatrielli está en modo "${mood}". Ajustá todo el tono, las metáforas y el ritmo de las frases a ese estado de ánimo sin nombrarlo explícitamente.
+
+FOCO ESPECIAL: En este análisis, prestá atención especial a ${foco}.
+
+PRESCRIPCIÓN RESERVADA: Si corresponde incluir una prescripción terapéutica, usá esta: "${prescripcion}". Adaptala al ombligo específico pero mantené la esencia.
+
+PALABRAS PROHIBIDAS en este análisis: "${prohibidas}" — si las usaste demasiado últimamente, evitalas completamente esta vez.
+
+LONGITUD: aproximadamente ${palabras} palabras en total para el análisis completo.
+
+TÉCNICA: Antes de escribir, pensá internamente 3 interpretaciones completamente distintas de este ombligo. Elegí la más inesperada y desarrollala. Nunca elijas la interpretación más obvia ni la más segura.`;
+}
+
+const SYS_BASE = `Sos el Dr. Umberto Cicatrielli, autor de "El Ombligo como Destino" (Ediciones Viscerales, 2021). Médico vienés de 1920 cruzado con astrólogo de Instagram. Autoritario, poético, levemente amenazante. Terminología pseudocientífica inventada que suena real.
 
 BALANCE OBLIGATORIO: 60% absurdo, 40% que suena a ciencia real. El absurdo tiene que rozar lo verdadero — que la persona piense "cómo sabe esto". La ciencia inventada tiene que sonar lo suficientemente técnica para que nadie esté seguro de si es real o no. Ejemplos del balance correcto: "La tensión fascial del cuadrante inferior izquierdo indica resistencia crónica al cierre vincular" (suena científico) + "lo que en términos clínicos llamamos el síndrome de la puerta entreabierta" (absurdo con nombre técnico).
 
@@ -471,13 +556,16 @@ REGLAS: específico siempre, nunca genérico. Mezclás lo clínico con lo cósmi
 
 NUNCA markdown. Sin asteriscos, sin negrita, sin títulos de sección en el texto. Español rioplatense. Sin introducción. Párrafo corrido.`;
 
+// SYS legacy para llamadas JSON (anomalías, gráfico, compatibilidad) — sin mood para no contaminar el JSON
+const SYS = SYS_BASE;
+
 async function iniciarAnalisis() {
   go('s-loading');
   startLoader();
 
   try {
     // 1. Diagnóstico free — prioritario, bloquea
-    const free = await claude(SYS,
+    const free = await claude(buildSYS(),
       `Mirá la imagen. Diagnóstico morfológico de primer nivel. En 80-90 palabras:
 Nombrá el tipo de ombligo con nombre inventado específico que genere identidad.
 Una observación de carácter absurdamente precisa — que la persona piense "cómo sabe esto". Algo como "termina las frases de los demás pero nunca las propias" o "tiene una relación complicada con las instrucciones de montaje de muebles".
@@ -572,7 +660,7 @@ async function desbloquear(sinFoto = false) {
 
   try {
     const [psico, fortuna] = await Promise.all([
-      claude(SYS,
+      claude(buildSYS(),
         `${contexto} Perfil psicológico profundo en 100-110 palabras:
 Cómo funciona esta persona en vínculos, trabajo y conflictos — absurdamente específico. No "evita el conflicto" sino "evita el conflicto pero lleva un registro mental de cada uno desde 2011, ordenado cronológicamente". Citá un estudio longitudinal inventado con cifras precisas.
 Mecanismo de defensa con nombre clínico inventado que suene real + una frase que lo explique.
@@ -580,7 +668,7 @@ Cerrá con una advertencia clínica de una línea que quiera mandarle a su terap
 Sin títulos. Párrafo corrido.`,
         !sinFoto
       ),
-      claude(SYS,
+      claude(buildSYS(),
         `${contexto} Predicción de salud y fortuna en 100-110 palabras:
 Dos o tres órganos con personalidad propia y qué les pasa ahora mismo (el bazo nostálgico, el páncreas con sus dos variantes, el nervio vago que tiene opiniones sobre WhatsApp).
 Amor, dinero y trabajo para los próximos 6 meses — porcentajes precisos inventados, tipo "hay un 71% de probabilidad de que alguien que no ves hace dos años te mande un mensaje un martes".
