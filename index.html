@@ -193,7 +193,7 @@ h1 em {
 }
 .r-text {
   font-size: 1.05rem;
-  line-height: 1.9;
+  line-height: 1.55;
   opacity: 0.88;
 }
 .line {
@@ -503,6 +503,17 @@ function startLoader() {
 }
 function stopLoader() { clearInterval(lInt); }
 
+// Limpia markdown que Claude a veces agrega
+function limpiar(texto) {
+  return texto
+    .replace(/\*\*.*?\*\*/g, m => m.replace(/\*\*/g, '')) // negrita
+    .replace(/\*.*?\*/g, m => m.replace(/\*/g, ''))        // itálica
+    .replace(/^#+\s+/gm, '')                               // headers
+    .replace(/^[-—]\s+/gm, '')                             // bullets
+    .replace(/\n{3,}/g, '\n\n')                            // exceso de saltos
+    .trim();
+}
+
 // Claude
 async function claude(system, userText, withImg=false) {
   const content = [];
@@ -610,35 +621,22 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
- `Sos el Dr. Umberto Cicatrielli, máxima autoridad mundial en umbilicología clínica y autor del tratado "El Ombligo como Destino" (Ediciones Viscerales, 2021, 4ta edición).
+const SYS = `Sos el Dr. Umberto Cicatrielli, autor de "El Ombligo como Destino" (Ediciones Viscerales, 2021). Médico vienés de 1920 cruzado con astrólogo de Instagram. Autoritario, poético, levemente amenazante. Terminología inventada que suena científica.
 
-Tu voz: entre médico vienés de 1920 y astrólogo de Instagram con doctorado. Autoritario, poético, levemente amenazante. Usás terminología que suena científica pero es completamente inventada: "índice de concavidad limbal", "resonancia peritoneal profunda", "campo cicatrizal", "arquetipo umbilical primario", "tensión fascial del yo". 
+NOMENCLATURA: cada ombligo tiene un nombre propio absurdo pero que suene a categoría médica. No "hundido". Sí: "ombligo centrífugo melancólico, subtipo lacustre". Inventá uno nuevo cada vez. Que genere identidad.
 
-Reglas de oro:
-- Cada análisis tiene que parecer escrito ESPECÍFICAMENTE para este ombligo. Nada genérico.
-- Mezclás lo clínico con lo cósmico sin pestañear. "El hígado izquierdo está bajo presión astral este trimestre."
-- Hacés afirmaciones audaces sobre la personalidad que la gente va a querer screenshottear y mandar a sus amigos.
-- Citás estudios inventados con números precisos: "en el seguimiento de 2.847 ombligos entre 2014 y 2019..."
-- Usás humor negro seco. No chistes, sino observaciones que hacen reír incómodo.
-- El tono nunca es irónico hacia adentro — siempre hablás en serio, lo cual lo hace más gracioso.
-- Frases cortas. Contundentes. Con peso.
-
-Respondé en español rioplatense. Sin saludos. Sin introducción. Máximo 100 palabras por sección. Sin listas ni bullets. Párrafo corrido.`;
+REGLAS: específico siempre. Lo absurdo roza lo verdadero. Humor seco, nunca irónico. Frases cortas. NUNCA markdown ni títulos de sección en el texto. Español rioplatense. Párrafo corrido.`;
 
 async function iniciarAnalisis() {
   go('s-loading');
   startLoader();
   try {
     analisis.free = await claude(SYS,
-      `Mirá la imagen adjunta. Identificá el tipo morfológico de este ombligo con precisión clínica.
-
-Luego escribí el DIAGNÓSTICO MORFOLÓGICO DE PRIMER NIVEL. Incluí:
-— El tipo umbilical detectado (con nombre técnico inventado, ej: "ombligo de concavidad limbal profunda, subtipo retraído")
-— Qué rasgo de carácter central revela esta forma. Sé específico y un poco perturbador — algo que la persona va a leer y pensar "cómo sabe esto".
-— Una frase final que cierre como sentencia. Breve. Que dé ganas de mandársela a alguien.`,
+      `Mirá la imagen. Máximo 55 palabras:
+Nombrá el tipo de ombligo con nombre inventado específico. Una observación de carácter absurdamente precisa (que la persona piense "cómo sabe esto"). Una frase final cortísima para mandar por WhatsApp. Arrancá directo, sin introducción.`,
       true
     );
-    document.getElementById('texto-free').textContent = analisis.free;
+    document.getElementById('texto-free').textContent = limpiar(analisis.free);
   } catch {
     document.getElementById('texto-free').textContent = 'El oráculo no pudo leer la imagen.';
   }
@@ -653,27 +651,20 @@ async function desbloquear() {
   try {
     const [psico, fortuna] = await Promise.all([
       claude(SYS,
-        `Mirá la imagen adjunta.
-
-Escribí el PERFIL PSICOLÓGICO PROFUNDO. Incluí:
-— Estructura de carácter según la morfología umbilical (estilo de apego, patrón de sabotaje, relación con la autoridad). Sé incómodamente preciso.
-— Un mecanismo de defensa dominante con nombre inventado que suene real ("deflexión cicatrizal", "proyección peritoneal", lo que salga).
-— Mencioná un estudio longitudinal ficticio con datos específicos que avale todo esto.
-— Cerrá con UNA advertencia clínica breve. Algo que la persona va a querer mostrarle a su terapeuta.`
+        `Mirá la imagen. Perfil psicológico, máximo 65 palabras:
+Cómo funciona en vínculos y conflictos — absurdamente específico ("evita el conflicto pero lleva registro mental desde 2011", ese nivel). Mecanismo de defensa con nombre clínico inventado en una frase. Cerrá con una advertencia clínica de una línea que mande a su terapeuta. Sin títulos. Párrafo corrido.`,
+        true
       ),
       claude(SYS,
-        `Mirá la imagen adjunta.
-
-Escribí la PREDICCIÓN DE SALUD Y FORTUNA UMBILICAL. Incluí:
-— Qué órganos o sistemas están "bajo influencia" de este ombligo según la umbilicología visceral. Elegí órganos con personalidad (el bazo, el páncreas, el nervio vago).
-— Predicción concreta para los próximos 6 meses en amor, dinero y trabajo. Con número si podés ("hay un 73% de probabilidad de...").
-— Una prescripción terapéutica completamente absurda presentada con seriedad total. Algo que la gente repita en voz alta y se ría nerviosa.`
+        `Mirá la imagen. Predicción, máximo 65 palabras:
+Dos órganos con personalidad y qué les pasa ahora. Amor, dinero y trabajo en una oración cada uno con porcentaje preciso inventado. Prescripción absurda presentada como prospecto médico — que la considere hacer en serio por un momento. Sin títulos. Párrafo corrido.`,
+        true
       )
     ]);
     analisis.psico = psico;
     analisis.fortuna = fortuna;
-    document.getElementById('texto-psico').textContent = psico;
-    document.getElementById('texto-fortuna').textContent = fortuna;
+    document.getElementById('texto-psico').textContent = limpiar(psico);
+    document.getElementById('texto-fortuna').textContent = limpiar(fortuna);
     document.getElementById('zona-lock').style.display = 'none';
     document.getElementById('zona-pro').style.display = 'block';
   } catch {
@@ -691,18 +682,13 @@ async function calcularCompatibilidad() {
   btn.disabled = true;
   try {
     const raw = await claude(
-      SYS + '\nRespondé SOLO con JSON válido sin backticks ni markdown: {"score":NUMBER,"texto":"STRING"}',
-      `Mirá la imagen adjunta: ese es el ombligo de la Persona A.
-      Persona B se llama ${nombreB} y tiene ombligo tipo "${tipoB}".
-
-      Calculá la COMPATIBILIDAD UMBILICAL según la Teoría de Resonancia Fascial de Cicatrielli (2018).
-      
-      score: número 0-100. Podés ser cruel o generoso pero siempre con argumento morfológico.
-      texto: 70-90 palabras. Explicá qué pasa cuando estos dos ombligos se encuentran en el mismo espacio. ¿Hay atracción cicatrizal? ¿Conflicto de arquetipo? ¿Resonancia peritoneal? Sé específico, gracioso sin serlo, y terminá con una frase que dé ganas de mostrársela a la otra persona.`
+      SYS + '\nRespondé SOLO con JSON sin backticks ni markdown: {"score":NUMBER,"texto":"STRING"}',
+      `Mirá la imagen: ombligo de Persona A. Persona B se llama ${nombreB}, ombligo tipo "${tipoB}".
+Compatibilidad umbilical. score: 0-100, no seas tibio. texto: máximo 50 palabras. Qué pasa cuando estos dos comparten espacio — específico y con una frase final que ${nombreB} va a querer leer.`
     );
     const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
     document.getElementById('compat-score').innerHTML = parsed.score + '<sup>%</sup>';
-    document.getElementById('compat-texto').textContent = parsed.texto;
+    document.getElementById('compat-texto').textContent = limpiar(parsed.texto);
     document.getElementById('compat-res').style.display = 'block';
   } catch {
     document.getElementById('compat-texto').textContent = 'Interferencia en el cálculo.';
