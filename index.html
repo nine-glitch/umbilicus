@@ -453,7 +453,7 @@ async function claude(system, userText, withImg = false, extra = {}) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
-      temperature: 1.15,
+      temperature: 1.0,
       system,
       messages: [{ role: 'user', content }],
       ...extra
