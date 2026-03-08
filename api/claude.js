@@ -26,6 +26,8 @@ export default async function handler(req) {
       body: JSON.stringify({
         model: body.model || 'claude-sonnet-4-20250514',
         max_tokens: body.max_tokens || 1000,
+        temperature: body.temperature,
+        top_p: body.top_p,
         system: body.system,
         messages: body.messages,
       }),
