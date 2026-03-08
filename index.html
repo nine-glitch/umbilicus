@@ -761,10 +761,11 @@ footer{text-align:center;font-style:italic;opacity:0.2;font-size:0.75rem;margin-
 </div>
 <div class="lbl">Tipo umbilical detectado</div>
 <div class="val">${tipoOmbligo}</div>
+${idx.some(v => v != null) ? `
 <div class="lbl">Índices umbilicales globales</div>
 <div class="indices">
   ${labels.map((l, i) => `<div class="idx-item"><div class="idx-num">${idx[i] != null ? idx[i] + '%' : '—'}</div><div class="idx-lbl">${l}</div></div>`).join('')}
-</div>
+</div>` : ''}
 ${score ? `<div class="lbl">Compatibilidad umbilical</div><div class="val">${score}</div>` : ''}
 <hr>
 <div class="lbl">Diagnóstico morfológico</div>
